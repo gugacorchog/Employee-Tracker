@@ -27,7 +27,7 @@ function init() {
 function loadMainMenu() {
     inquirer.prompt(menuQuestions)
     .then(res => {
-        switch(res.menuChoices) {
+        switch(res.choice) {
           case "VIEW_ALL_DEPARTMENTS":
           // call view all employees function
           viewAllDepartments()
