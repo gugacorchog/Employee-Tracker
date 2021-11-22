@@ -1,6 +1,5 @@
 const inquirer = require('inquirer')
 const mysql = require('mysql2');
-const menuChoices = require('./models/menu');
 const menuQuestions = require('./models/menu');
 
 const connection = mysql.createConnection(
@@ -15,10 +14,6 @@ const connection = mysql.createConnection(
 },
     console.log(`Connected to the employee_db database.`)
 );
-
-// THEN I am presented with the following options: 
-// view all departments, presented with a formatted table 
-// showing department names and department ids ( From seeds.sql)
 
 function init() {
     loadMainMenu()
@@ -38,8 +33,8 @@ function loadMainMenu() {
           case "VIEW_ALL_EMPLOYEE":
           viewAllEmployee()
           break;  
-          case "ADD_A_DEPARTMENT":
-          addDepartment()
+          case "ADD_OPTIONS":
+          add()
           break;
         }
       }
@@ -81,22 +76,176 @@ function loadMainMenu() {
                
     };
 
-    function addDepartment() {
-        connection.promise().query(`
-           INSERT INTO department (name)
-           VALUES (?)`,
-            "test",function(err, res) {
-           if(err) throw err;
-           console.log('add department successed');
-           loadMainMenu();
-        });  
+    const add = () => {
+    inquirer
+        .prompt({
+            name: 'add',
+            type: 'list',
+            message: 'What data you want to add?',
+            choices: ['Department', 'Role', 'Employee', 'Back']
+        })
+        .then((chosen) => {
+            switch(chosen.add) {
+                case 'Department':
+                    addDepartment();
+                break;
+                case 'Role':
+                    addRole();
+                break;
+                case 'Employee':
+                    addEmployee();
+                break;
+                default:
+                    loadMainMenu();
+            }
+        });
     }
+
+    const addDepartment = () => {
+        inquirer
+            .prompt({
+                name: 'name',
+                type: 'input',
+                message: 'deparment name'
+            })
+            .then((input) => {
+                connection.query(`
+                    INSERT INTO department (name)
+                    VALUES (?)
+                    `, input.name ,function(err, res) {
+                    if(err) throw err;
+                    console.log('add department successed');
+                    loadMainMenu();
+                });
+    
+            });
+    }
+
+    const addRole = () => {
+        connection.query(`SELECT * FROM department`,
+            function(err, res) {
+                if(err) throw err;
+                inquirer
+                    .prompt([
+                        {
+                            name: 'title',
+                            type: 'input',
+                            message: 'role title'
+                        },
+                        {
+                            name: 'salary',
+                            type: 'number',
+                            message: 'role salary'
+                        },
+                        {
+                            name: 'department_name',
+                            type: 'rawlist',
+                            message: 'department',
+                            choices: () => {
+                                const list = [];
+                                for(let i = 0; i < res.length; i++) {
+                                    list.push(res[i].name);
+                                }
+                                return list;
+                                }
+                        }
+                    ]) // prompt end
+                    .then((answer) => {
+                        // console.log(answer);
+                        const department_id = findId(answer.department_name, res);
+                        connection.query(`
+                            INSERT INTO role (title, salary, department_id)
+                            VALUES(?,?,?)
+                            `,[answer.title, answer.salary, department_id],
+                            function(err, res) {
+                                if(err) throw err;
+                                console.log('add role successed');
+                            });
+                            loadMainMenu();
+                    }) //then
+                    .catch(err => err);
+                });
+    }
+    const addEmployee = () =>{
+        findRole();
+        findEmployee();
+        inquirer
+            .prompt([
+                {
+                    name: 'first_name',
+                    type: 'input',
+                    message: 'Employee\'s first name'
+                },
+                {
+                    name: 'last_name',
+                    type: 'input',
+                    message: 'Employee\'s last name'
+                },
+                {
+                    name: 'role',
+                    type: 'rawlist',
+                    message: 'employee role',
+                    choices: () => {
+                        const list = [];
+                        for(let i = 0; i < roleObj.length; i++) {
+                            list.push(roleObj[i].name);
+                            // console.log(list);
+                        }
+                        return list;
+                    }
+                },
+                {
+                    name: 'manager',
+                    type: 'rawlist',
+                    message: 'employee manager',
+                    choices: () => {
+                        employeeObj.push('null');
+                        const list = [];
+                        for(let i = 0; i < employeeObj.length; i++) {
+                            list.push(employeeObj[i]);
+                            // console.log(list);
+                        }
+                        return list;
+                    }
+                }
+            ])
+            .then((answer) => {
+                // console.log(answer);
+                const role_id = findId(answer.role, roleObj);
+                const manager_id = findId(answer.manager, employeeObj);
+                // console.log('role: ' + role_id + '\nm: ' + manager_id)
+                connection.query(`
+                    INSERT INTO employee (first_name, last_name, role_id, manager_id)
+                    VALUES (?, ?, ? , ?)
+                    `,[answer.first_name ,answer.last_name ,role_id , manager_id] ,function (err, res) {
+                        if(err) throw err;
+                        console.log('add employee successed');
+                        return loadMainMenu();
+                        
+                    });
+            }).catch(err => err);
+    }
+    const findRole = () => {
+        connection.query(`SELECT id, title AS 'name' FROM role`,
+            function(err, res){
+                if(err) throw err;
+                for(let i = 0; i < res.length ;i++) {
+                    roleObj.push(res[i]);
+                }
+                return roleObj;
+            });
+    }
+    const findEmployee = () => {
+        connection.query(IdEmployeeName, function(err, res) {
+            if(err) throw err;
+            for(let i = 0; i< res.length ; i++) {
+                employeeObj.push(res[i]);
+            }
+            return employeeObj;
+        });
+    }
+    const IdEmployeeName = `SELECT id, CONCAT(first_name, ' ', last_name) AS 'name' FROM employee`;
+    const roleObj = [];
+    const employeeObj = [];
+
     init()
-
-
-// view all roles, presented with the job title, role id, the department that role belongs to, and the salary for that role
-// view all employees, presented with a formatted table showing employee data, including employee ids, first names, last names, job titles, departments, salaries, and managers that the employees report to
-// add a department, prompted to enter the name of the department and that department is added to the database
-// add a role, prompted to enter the name, salary, and department for the role and that role is added to the database
-// add an employee, prompted to enter the employee’s first name, last name, role, and manager, and that employee is added to the database
-// and update an employee role, prompted to select an employee to update and their new role and this information is updated in the database
