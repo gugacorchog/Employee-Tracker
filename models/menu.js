@@ -42,12 +42,23 @@ const menuQuestions = {
          {
             name: "Add_a_department",
             value: "ADD_A_DEPARTMENT"
+         },
+         {
+            name: "Add_a_role",
+            value: "ADD_A_ROLE"
+         },
+         {
+            name: "Add_a_employee",
+            value: "ADD_A_EMPLOYEE"
+         },
+         {
+            name: "update_an_employee_role",
+            value: "ADD_AN_EMPLOYEE_ROLE"
          }
         ]
       }
  
      
-
 //     mainMenuPrompt: "What would you like to do?",
 //     addEmployee1: "What is the employee's first name?",
 //     addEmployee2: "What is the employee's last name?",
