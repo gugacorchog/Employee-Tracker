@@ -83,15 +83,14 @@ function loadMainMenu() {
 
     function addDepartment() {
         connection.promise().query(`
-           "INSERT INTO department (name)
-           VALUES`,
-            input.name ,function(err, res) {
+           INSERT INTO department (name)
+           VALUES (?)`,
+            "test",function(err, res) {
            if(err) throw err;
            console.log('add department successed');
            loadMainMenu();
         });  
     }
-    
     init()
 
 
