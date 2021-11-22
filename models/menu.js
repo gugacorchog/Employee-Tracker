@@ -38,11 +38,15 @@ const menuQuestions = {
           {
             name: "View_all_employee",
             value: "VIEW_ALL_EMPLOYEE"
+         },
+         {
+            name: "Add_a_department",
+            value: "ADD_A_DEPARTMENT"
          }
         ]
       }
  
-      
+     
 
 //     mainMenuPrompt: "What would you like to do?",
 //     addEmployee1: "What is the employee's first name?",

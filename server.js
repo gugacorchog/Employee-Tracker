@@ -38,6 +38,9 @@ function loadMainMenu() {
           case "VIEW_ALL_EMPLOYEE":
           viewAllEmployee()
           break;  
+          case "ADD_A_DEPARTMENT":
+          addDepartment()
+          break;
         }
       }
     )}
@@ -74,8 +77,22 @@ function loadMainMenu() {
                  console.log("\n"); // add new line
                  console.table(employee);
              })    
-             .then(() => loadMainMenu());    
-
+             .then(() => loadMainMenu());
+             {
+                 function addDepartment() {
+                     connection.promise().query(`
+                        "INSERT INTO department (name)
+                        VALUES`,
+                         input.name ,function(err, res) {
+                        if(err) throw err;
+                        console.log('add department successed');
+                        loadMainMenu();
+                    });
+                     
+                 }   
+             }    
+    };
+    
     init()
 
 
