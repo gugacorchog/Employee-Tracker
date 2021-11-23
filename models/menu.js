@@ -19,8 +19,16 @@ const menuQuestions = {
          {
             name: "ADD_OPTIONS",
             value: "ADD_OPTIONS",
-         }  
+         },
+         {
+            name: "UPDATE_OPTIONS",
+            value: "UPDATE_OPTIONS",
+         },   
+         {
+            name: "DELETE_OPTIONS",
+            value: "DELETE_OPTIONS",
+         }   
         ]
       }
- 
+
 module.exports = menuQuestions;
