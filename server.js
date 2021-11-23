@@ -19,6 +19,11 @@ function init() {
     loadMainMenu()
 }
 
+function findId(targetString, valuesArray) {
+    const targetValue = valuesArray.find(value => value.name === targetString);
+    return targetValue.id;
+}
+
 function loadMainMenu() {
     inquirer.prompt(menuQuestions)
     .then(res => {
